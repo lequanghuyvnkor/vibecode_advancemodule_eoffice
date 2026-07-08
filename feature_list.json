@@ -3,72 +3,88 @@
     {
       "id": "feat-001",
       "name": "Project Setup & Verification Baseline",
-      "description": "Đảm bảo repo Next.js/React có thể install dependency, chạy lint/type-check/test/build sạch từ checkout mới. Bổ sung script còn thiếu vào package.json nếu cần.",
+      "description": "Đảm bảo repo Next.js/React install/lint/type-check/test/build sạch từ checkout mới. Bổ sung script còn thiếu vào package.json.",
       "dependencies": [],
       "status": "not-started",
       "evidence": ""
     },
     {
       "id": "feat-002",
-      "name": "Trip Lifecycle Core",
-      "description": "Implement state machine chuyến: draft → pendingdriver → ready → progress → await → settled → pendingclose → closed (kèm nhánh canceled, declined, reopened). Dùng đúng CSS status token, không dùng tên hiển thị.",
+      "name": "[SF-1] Trip Management",
+      "description": "State machine: draft → pendingdriver → ready → progress → end → closed (nhánh declined, canceled). CHỈ 8 token này — không dùng await/settled/pendingclose ở Trip (xem AGENTS.md mục 3). Form tạo chuyến 1 trang gộp (tuyến/ngày/hàng hoá/tài xế-xe/dự toán). GPS bắt buộc khi End, block nếu GPS tắt. Toàn bộ luồng tài chính diễn ra khi Trip = end. AuditLog mọi transition.",
       "dependencies": ["feat-001"],
       "status": "not-started",
       "evidence": ""
     },
     {
       "id": "feat-003",
-      "name": "Advance Request Module",
-      "description": "Tạo/submit/duyệt/từ chối/giải ngân AdvanceRequest. Ngưỡng: > standard_advance x1.3 phải qua Giám đốc duyệt, ngược lại Kế toán duyệt. Phân biệt rõ 'Tạm ứng chuyến' (đầu trip, QLVH tạo) và 'Tạm ứng phát sinh' (trong trip, tài xế tạo).",
+      "name": "[SF-2] Advance Request",
+      "description": "2 loại: Tạm ứng chuyến (QLVH tạo, trip ≥ ready) và Tạm ứng phát sinh (tài xế tạo, trip = progress). Trip-centric bắt buộc — không có tạm ứng tự do. State: draft → pending → approved → disbursed | rejected; approved → canceled (trước disbursed); disbursed → cần Reversal nếu trip bị hủy. Approved không sửa trực tiếp, phải cancel + tạo mới.",
       "dependencies": ["feat-002"],
       "status": "not-started",
       "evidence": ""
     },
     {
       "id": "feat-004",
-      "name": "Expense Verification Queue",
-      "description": "Hàng đợi đối soát chi phí cho Kế toán: verify / need-info / rejected trên từng ExpenseItem. Chỉ Finance Engine (Kế toán) có quyền này — Logistics Engine không được tự xác nhận. Expense thiếu receipt tự tạo 'Missing Receipt Exception'.",
+      "name": "[SF-3] Approval & Disbursement",
+      "description": "Routing tự động theo ngưỡng: ≤ standard_advance×1.3 → Kế toán; vượt → Giám đốc. Reject bắt buộc lý do. Disbursement record ghi đủ ngày chi/số tiền/phương thức/người chi; tự tạo CashMovement. Chỉ Kế toán ghi Disbursement.",
       "dependencies": ["feat-003"],
       "status": "not-started",
       "evidence": ""
     },
     {
       "id": "feat-005",
-      "name": "Settlement Engine",
-      "description": "Tính Variance = Total Advance - Total Valid Expense. Luồng: draft → await (reviewing) → settled (confirmed) → closed. Reopen chỉ Giám đốc thực hiện được khi đã closed.",
-      "dependencies": ["feat-004"],
+      "name": "[SF-4] Expense Capture",
+      "description": "Offline-first: ghi local khi mất mạng, sync_status Pending→Synced khi có mạng, idempotency_key (từ local_uuid) chống ghi trùng. Loại chi phí cố định 6 loại. Không ảnh chứng từ → tự tạo Missing Receipt Exception. Tài xế chỉ tạo/nộp, không tự verify.",
+      "dependencies": ["feat-002"],
       "status": "not-started",
       "evidence": ""
     },
     {
       "id": "feat-006",
-      "name": "Driver Balance Ledger",
-      "description": "Ghi công nợ tài xế CHỈ SAU KHI Settlement = settled (confirmed). Trạng thái: open → partially-cleared → cleared, hoặc disputed → adjusted → cleared.",
+      "name": "[SF-5] Expense Verification",
+      "description": "Độc quyền Kế toán: submitted → verified | need-info → resubmitted → verified|rejected | rejected. Need-info/rejected bắt buộc lý do. Settlement (feat-007) chỉ unlock khi mọi expense đã ở trạng thái cuối.",
       "dependencies": ["feat-005"],
       "status": "not-started",
       "evidence": ""
     },
     {
       "id": "feat-007",
-      "name": "Trip Closing 3-way Flow (UI + API)",
-      "description": "Luồng đóng chuyến 3 bên: Tài xế bấm End + GPS bắt buộc (không cho end nếu GPS tắt) → Kế toán verify + confirm settlement → Tài xế OK quyết toán (settled → pendingclose) → QLVH Close (chỉ unlock khi status = pendingclose).",
+      "name": "[SF-6] Settlement Calculation",
+      "description": "State machine RIÊNG của Settlement (độc lập Trip): draft → await → settled → closed, closed → reopened (chỉ Giám đốc). Variance = Total Advance − Total Valid Expense → REFUND_REQUIRED / ADDITIONAL_PAYMENT / BALANCED. Sau confirm (settled) → lock.",
       "dependencies": ["feat-006"],
       "status": "not-started",
       "evidence": ""
     },
     {
       "id": "feat-008",
-      "name": "SLA Alert & Audit Log",
-      "description": "Cảnh báo SLA khi trip ở await quá 72h chưa Settlement. Ghi AuditLog cho mọi thay đổi dữ liệu tài chính (void/reverse/cancel/adjust/reopen) — không hard-delete.",
+      "name": "[SF-7] Driver Confirmation & Trip Closing",
+      "description": "Luồng 3 bên bắt buộc thứ tự: Kế toán confirm Settlement (settled) → Tài xế bấm OK (set flag driver_confirmed_at trên Trip, KHÔNG đổi Trip status) → QLVH Close (Trip: end→closed, Settlement: settled→closed). QLVH chỉ Close được khi Settlement=settled VÀ driver_confirmed_at đã có. Dispute/từ chối quyết toán của tài xế: CHƯA CÓ FLOW (Issues List C-005) — không tự code, hỏi PM nếu gặp.",
       "dependencies": ["feat-007"],
       "status": "not-started",
       "evidence": ""
     },
     {
       "id": "feat-009",
-      "name": "Documentation & Handoff",
-      "description": "Cập nhật docs/ và README theo đúng thay đổi thực tế, đảm bảo progress.md và session-handoff.md phản ánh đúng trạng thái cuối phiên.",
-      "dependencies": ["feat-008"],
+      "name": "[SF-8] Driver Balance",
+      "description": "Entry tự động tạo khi Settlement → settled (không tạo tay). credit nếu REFUND_REQUIRED, debit nếu ADDITIONAL_PAYMENT. State: open → partially-cleared → cleared, hoặc open → disputed → adjusted → cleared. Ledger liên tục, không ghi đè.",
+      "dependencies": ["feat-007"],
+      "status": "not-started",
+      "evidence": ""
+    },
+    {
+      "id": "feat-010",
+      "name": "[SF-9] Notification & SLA Alert",
+      "description": "9 trigger cố định N-01→N-09 (xem SRS 3.9.3), event-driven, gửi < 30s, retry tối đa 3 lần nếu fail. SLA Alert khi Trip = end chưa có Settlement = settled quá 72h (±5 phút) → gửi đồng thời QLVH + Kế toán.",
+      "dependencies": ["feat-003", "feat-004", "feat-006", "feat-007", "feat-008"],
+      "status": "not-started",
+      "evidence": ""
+    },
+    {
+      "id": "feat-011",
+      "name": "[SF-10] Dashboard, Reporting & Export",
+      "description": "Dashboard riêng theo role (QLVH/Kế toán/Giám đốc) — view layer, không tạo state. Export CSV/PDF < 10 giây; format CSV tương thích import MISA/Fast Accounting.",
+      "dependencies": ["feat-009", "feat-010"],
       "status": "not-started",
       "evidence": ""
     }
