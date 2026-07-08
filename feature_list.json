@@ -1,0 +1,76 @@
+{
+  "features": [
+    {
+      "id": "feat-001",
+      "name": "Project Setup & Verification Baseline",
+      "description": "Đảm bảo repo Next.js/React có thể install dependency, chạy lint/type-check/test/build sạch từ checkout mới. Bổ sung script còn thiếu vào package.json nếu cần.",
+      "dependencies": [],
+      "status": "not-started",
+      "evidence": ""
+    },
+    {
+      "id": "feat-002",
+      "name": "Trip Lifecycle Core",
+      "description": "Implement state machine chuyến: draft → pendingdriver → ready → progress → await → settled → pendingclose → closed (kèm nhánh canceled, declined, reopened). Dùng đúng CSS status token, không dùng tên hiển thị.",
+      "dependencies": ["feat-001"],
+      "status": "not-started",
+      "evidence": ""
+    },
+    {
+      "id": "feat-003",
+      "name": "Advance Request Module",
+      "description": "Tạo/submit/duyệt/từ chối/giải ngân AdvanceRequest. Ngưỡng: > standard_advance x1.3 phải qua Giám đốc duyệt, ngược lại Kế toán duyệt. Phân biệt rõ 'Tạm ứng chuyến' (đầu trip, QLVH tạo) và 'Tạm ứng phát sinh' (trong trip, tài xế tạo).",
+      "dependencies": ["feat-002"],
+      "status": "not-started",
+      "evidence": ""
+    },
+    {
+      "id": "feat-004",
+      "name": "Expense Verification Queue",
+      "description": "Hàng đợi đối soát chi phí cho Kế toán: verify / need-info / rejected trên từng ExpenseItem. Chỉ Finance Engine (Kế toán) có quyền này — Logistics Engine không được tự xác nhận. Expense thiếu receipt tự tạo 'Missing Receipt Exception'.",
+      "dependencies": ["feat-003"],
+      "status": "not-started",
+      "evidence": ""
+    },
+    {
+      "id": "feat-005",
+      "name": "Settlement Engine",
+      "description": "Tính Variance = Total Advance - Total Valid Expense. Luồng: draft → await (reviewing) → settled (confirmed) → closed. Reopen chỉ Giám đốc thực hiện được khi đã closed.",
+      "dependencies": ["feat-004"],
+      "status": "not-started",
+      "evidence": ""
+    },
+    {
+      "id": "feat-006",
+      "name": "Driver Balance Ledger",
+      "description": "Ghi công nợ tài xế CHỈ SAU KHI Settlement = settled (confirmed). Trạng thái: open → partially-cleared → cleared, hoặc disputed → adjusted → cleared.",
+      "dependencies": ["feat-005"],
+      "status": "not-started",
+      "evidence": ""
+    },
+    {
+      "id": "feat-007",
+      "name": "Trip Closing 3-way Flow (UI + API)",
+      "description": "Luồng đóng chuyến 3 bên: Tài xế bấm End + GPS bắt buộc (không cho end nếu GPS tắt) → Kế toán verify + confirm settlement → Tài xế OK quyết toán (settled → pendingclose) → QLVH Close (chỉ unlock khi status = pendingclose).",
+      "dependencies": ["feat-006"],
+      "status": "not-started",
+      "evidence": ""
+    },
+    {
+      "id": "feat-008",
+      "name": "SLA Alert & Audit Log",
+      "description": "Cảnh báo SLA khi trip ở await quá 72h chưa Settlement. Ghi AuditLog cho mọi thay đổi dữ liệu tài chính (void/reverse/cancel/adjust/reopen) — không hard-delete.",
+      "dependencies": ["feat-007"],
+      "status": "not-started",
+      "evidence": ""
+    },
+    {
+      "id": "feat-009",
+      "name": "Documentation & Handoff",
+      "description": "Cập nhật docs/ và README theo đúng thay đổi thực tế, đảm bảo progress.md và session-handoff.md phản ánh đúng trạng thái cuối phiên.",
+      "dependencies": ["feat-008"],
+      "status": "not-started",
+      "evidence": ""
+    }
+  ]
+}
