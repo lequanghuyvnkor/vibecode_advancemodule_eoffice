@@ -11,10 +11,11 @@
 1. **Xác nhận thư mục làm việc**: `pwd`
 2. **Đọc toàn bộ file này**
 3. **Đọc `docs/SRS-advance-module.md`** — đặc biệt phần System Features (mục 3) tương ứng với feature đang làm. KHÔNG tự suy diễn business rule nếu SRS đã quy định rõ.
-4. **Kiểm tra codebase CSS/component thực tế** (xem mục 3 bên dưới — có rủi ro CSS token cũ chưa được dọn) trước khi code theo model Trip mới
-5. **Chạy `./init.sh`** để xác nhận môi trường build/lint/test sạch
-6. **Đọc `feature_list.json`** để biết feature nào đang active
-7. **Xem lịch sử gần nhất**: `git log --oneline -5`
+4. **Tham khảo giao diện mẫu** tại `docs/ui-reference/VinaSciTech E-Office_v2.1 (1).html` để xây dựng giao diện.
+5. **Kiểm tra codebase CSS/component thực tế** (xem mục 3 bên dưới — có rủi ro CSS token cũ chưa được dọn) trước khi code theo model Trip mới
+6. **Chạy `./init.sh`** để xác nhận môi trường build/lint/test sạch
+7. **Đọc `feature_list.json`** để biết feature nào đang active
+8. **Xem lịch sử gần nhất**: `git log --oneline -5`
 
 > Nếu baseline verification đang lỗi → sửa lỗi đó trước, không thêm scope mới lên nền đang hỏng.
 
@@ -103,6 +104,7 @@ closed → reopened  (chỉ Giám đốc)
 - `progress.md` — log liên tục qua các phiên
 - `init.sh` — verification chuẩn
 - `session-handoff.md` — bàn giao phiên dài
+- `docs/ui-reference/VinaSciTech E-Office_v2.1 (1).html` — thiết kế giao diện (UI) tham khảo
 
 ## 6. Định nghĩa "Done"
 
